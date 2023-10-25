@@ -160,6 +160,8 @@ As a CRM software, taking notes of previous interactions and their different out
 
 This section will describe in details the current implementation and design considerations of the interactions feature.
 
+![InteractionClassDiagram](images/InteractionClassDiagram.png)
+
 
 
 #### Design Considerations
