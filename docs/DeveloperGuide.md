@@ -156,7 +156,7 @@ This section describes some noteworthy details on how certain features are imple
 
 ### Interactions Feature
 
-As a CRM, taking notes of previous interactions and their different outcomes is one of the most imporant features.
+As a CRM software, taking notes of previous interactions and their different outcomes is one of the most imporant features.
 
 This section will describe in details the current implementation and design considerations of the interactions feature.
 
