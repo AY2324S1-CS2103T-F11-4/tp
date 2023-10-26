@@ -42,8 +42,13 @@ public class ContentDisplay extends UiPart<Region> {
         });
 
         selectedPerson.addListener((observable, oldValue, newValue) -> {
-            clientProfilePanel = new ClientProfilePanel(newValue);
             clientProfilePanelPlaceholder.getChildren().clear();
+
+            if (newValue == null) {
+                return;
+            }
+
+            clientProfilePanel = new ClientProfilePanel(newValue);
             clientProfilePanelPlaceholder.getChildren().add(clientProfilePanel.getRoot());
 
             // set focus within the list if the change is from a `view` command
