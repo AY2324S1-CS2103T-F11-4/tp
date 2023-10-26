@@ -11,7 +11,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.model.lead.Lead;
+import seedu.address.model.person.lead.Lead;
 import seedu.address.model.tag.Tag;
 
 /**
