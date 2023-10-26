@@ -156,13 +156,21 @@ This section describes some noteworthy details on how certain features are imple
 
 ### Interactions Feature
 
-As a CRM software, taking notes of previous interactions and their different outcomes is one of the most imporant features.
+As a CRM software, taking notes of previous interactions with customers as well as their different outcomes is one of the most imporant features. It will allow the user to keep track of the progress of their interactions with their customers and help them to better plan their future interactions with them.
 
 This section will describe in details the current implementation and design considerations of the interactions feature.
 
+#### Current Implementation
+
+The Interaction feature is implemented using the `Interaction` class. It is a simple class that contains the following fields:
+
 ![InteractionClassDiagram](images/InteractionClassDiagram.png)
 
+InteractionNote will store the details of the interaction, while InteractionOutcome will store the outcome of the interaction. There is also a date field to store the date of the interaction.
 
+The `Person` class will contain a list of `Interaction` objects, which will be used to store the interactions with the client.
+
+The class also has getters and setters for the fields, as well as a `toString()` method to display the interaction in a readable format.
 
 #### Design Considerations
 
