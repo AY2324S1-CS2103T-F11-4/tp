@@ -166,7 +166,9 @@ The Interaction feature is implemented using the `Interaction` class. It is a si
 
 ![InteractionClassDiagram](images/InteractionClassDiagram.png)
 
-InteractionNote will store the details of the interaction, while InteractionOutcome will store the outcome of the interaction. There is also a date field to store the date of the interaction.
+InteractionNote will store the details of the interaction.
+InteractionOutcome is an Enumeration with the following values: Interested, NotInterested, FollowUpRequired, Unknown and Closed. They are used to store the outcome of the interaction.
+There is also a date field to store the date of the interaction. This is set to the current date when the interaction is created.
 
 The `Person` class will contain a list of `Interaction` objects, which will be used to store the interactions with the client.
 
