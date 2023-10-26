@@ -22,9 +22,12 @@
           </minWidth>
         </Label>
         <Label fx:id="name" styleClass="cell_big_label" text="\$first">
-               <HBox.margin>
-                  <Insets />
-               </HBox.margin>
+          <minWidth>
+            <Region fx:constant="USE_PREF_SIZE" />
+          </minWidth>
+           <HBox.margin>
+              <Insets />
+           </HBox.margin>
         </Label>
         <FlowPane fx:id="lead" />
       </HBox>
