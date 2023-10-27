@@ -1,35 +1,34 @@
-
----  
-layout: page  
+---
+layout: page
 title: Developer Guide
----  
-* Table of Contents  
+---
+* Table of Contents
   {:toc}
 
---------------------------------------------------------------------------------------------------------------------  
+--------------------------------------------------------------------------------------------------------------------
 
 ## **Acknowledgements**
 
 * {list here sources of all reused/adapted ideas, code, documentation, and third-party libraries -- include links to the original source as well}
 
---------------------------------------------------------------------------------------------------------------------  
+--------------------------------------------------------------------------------------------------------------------
 
 ## **Setting up, getting started**
 
 Refer to the guide [_Setting up and getting started_](SettingUp.md).
-  
---------------------------------------------------------------------------------------------------------------------  
+
+--------------------------------------------------------------------------------------------------------------------
 
 ## **Design**
 
-<div markdown="span" class="alert alert-primary">  
+<div markdown="span" class="alert alert-primary">
 
 :bulb: **Tip:** The `.puml` files used to create diagrams in this document `docs/diagrams` folder. Refer to the [_PlantUML Tutorial_ at se-edu/guides](https://se-education.org/guides/tutorials/plantUml.html) to learn how to create and edit diagrams.
-</div>  
+</div>
 
 ### Architecture
 
-<img src="images/ArchitectureDiagram.png" width="280" />  
+<img src="images/ArchitectureDiagram.png" width="280" />
 
 The ***Architecture Diagram*** given above explains the high-level design of the App.
 
@@ -54,7 +53,7 @@ The bulk of the app's work is done by the following four components:
 
 The *Sequence Diagram* below shows how the components interact with each other for the scenario where the user issues the command `delete 1`.
 
-<img src="images/ArchitectureSequenceDiagram.png" width="574" />  
+<img src="images/ArchitectureSequenceDiagram.png" width="574" />
 
 Each of the four main components (also shown in the diagram above),
 
@@ -63,7 +62,7 @@ Each of the four main components (also shown in the diagram above),
 
 For example, the `Logic` component defines its API in the `Logic.java` interface and implements its functionality using the `LogicManager.java` class which follows the `Logic` interface. Other components interact with a given component through its interface rather than the concrete class (reason: to prevent outside component's being coupled to the implementation of a component), as illustrated in the (partial) class diagram below.
 
-<img src="images/ComponentManagers.png" width="300" />  
+<img src="images/ComponentManagers.png" width="300" />
 
 The sections below give more details of each component.
 
@@ -90,14 +89,14 @@ The `UI` component,
 
 Here's a (partial) class diagram of the `Logic` component:
 
-<img src="images/LogicClassDiagram.png" width="550"/>  
+<img src="images/LogicClassDiagram.png" width="550"/>
 
 The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete 1")` API call as an example.
 
 ![Interactions Inside the Logic Component for the `delete 1` Command](images/DeleteSequenceDiagram.png)
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `DeleteCommandParser` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline reaches the end of diagram.  
-</div>  
+<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `DeleteCommandParser` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline reaches the end of diagram.
+</div>
 
 How the `Logic` component works:
 
@@ -108,7 +107,7 @@ How the `Logic` component works:
 
 Here are the other classes in `Logic` (omitted from the class diagram above) that are used for parsing a user command:
 
-<img src="images/ParserClasses.png" width="600"/>  
+<img src="images/ParserClasses.png" width="600"/>
 
 How the parsing works:
 * When called upon to parse a user command, the `AddressBookParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name e.g., `AddCommandParser`) which uses the other classes shown above to parse the user command and create a `XYZCommand` object (e.g., `AddCommand`) which the `AddressBookParser` returns back as a `Command` object.
@@ -117,7 +116,7 @@ How the parsing works:
 ### Model component
 **API** : [`Model.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java)
 
-<img src="images/ModelClassDiagram.png" width="450" />  
+<img src="images/ModelClassDiagram.png" width="450" />
 
 
 The `Model` component,
@@ -127,18 +126,18 @@ The `Model` component,
 * stores a `UserPref` object that represents the user’s preferences. This is exposed to the outside as a `ReadOnlyUserPref` objects.
 * does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** An alternative (arguably, a more OOP) model is given below. It has a `Tag` list in the `AddressBook`, which `Person` references. This allows `AddressBook` to only require one `Tag` object per unique tag, instead of each `Person` needing their own `Tag` objects.<br>  
+<div markdown="span" class="alert alert-info">:information_source: **Note:** An alternative (arguably, a more OOP) model is given below. It has a `Tag` list in the `AddressBook`, which `Person` references. This allows `AddressBook` to only require one `Tag` object per unique tag, instead of each `Person` needing their own `Tag` objects.<br>
 
-<img src="images/BetterModelClassDiagram.png" width="450" />  
+<img src="images/BetterModelClassDiagram.png" width="450" />
 
-</div>  
+</div>
 
 
 ### Storage component
 
 **API** : [`Storage.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/storage/Storage.java)
 
-<img src="images/StorageClassDiagram.png" width="550" />  
+<img src="images/StorageClassDiagram.png" width="550" />
 
 The `Storage` component,
 * can save both address book data and user preference data in JSON format, and read them back into corresponding objects.
@@ -148,12 +147,34 @@ The `Storage` component,
 ### Common classes
 
 Classes used by multiple components are in the `seedu.addressbook.commons` package.
-  
---------------------------------------------------------------------------------------------------------------------  
+
+--------------------------------------------------------------------------------------------------------------------
 
 ## **Implementation**
 
 This section describes some noteworthy details on how certain features are implemented.
+
+### Interactions Feature
+
+As a CRM software, taking notes of previous interactions with customers as well as their different outcomes is one of the most imporant features. It will allow the user to keep track of the progress of their interactions with their customers and help them to better plan their future interactions with them.
+
+This section will describe in details the current implementation and design considerations of the interactions feature.
+
+#### Current Implementation
+
+The Interaction feature is implemented using the `Interaction` class. It is a simple class that contains the following fields:
+
+![InteractionClassDiagram](images/InteractionClassDiagram.png)
+
+InteractionNote will store the details of the interaction.
+InteractionOutcome is an Enumeration with the following values: Interested, NotInterested, FollowUpRequired, Unknown and Closed. They are used to store the outcome of the interaction.
+There is also a date field to store the date of the interaction. This is set to the current date when the interaction is created.
+
+The `Person` class will contain a list of `Interaction` objects, which will be used to store the interactions with the client.
+
+The class also has getters and setters for the fields, as well as a `toString()` method to display the interaction in a readable format.
+
+#### Design Considerations
 
 ### \[Proposed\] Undo/redo feature
 
@@ -161,9 +182,9 @@ This section describes some noteworthy details on how certain features are imple
 
 The proposed undo/redo mechanism is facilitated by `VersionedAddressBook`. It extends `AddressBook` with an undo/redo history, stored internally as an `addressBookStateList` and `currentStatePointer`. Additionally, it implements the following operations:
 
-* `VersionedAddressBook#commit()`—Saves the current address book state in its history.
-* `VersionedAddressBook#undo()`—Restores the previous address book state from its history.
-* `VersionedAddressBook#redo()`—Restores a previously undone address book state from its history.
+* `VersionedAddressBook#commit()` — Saves the current address book state in its history.
+* `VersionedAddressBook#undo()` — Restores the previous address book state from its history.
+* `VersionedAddressBook#redo()` — Restores a previously undone address book state from its history.
 
 These operations are exposed in the `Model` interface as `Model#commitAddressBook()`, `Model#undoAddressBook()` and `Model#redoAddressBook()` respectively.
 
@@ -181,32 +202,32 @@ Step 3. The user executes `add n/David …​` to add a new person. The `add` co
 
 ![UndoRedoState2](images/UndoRedoState2.png)
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If a command fails its execution, it will not call `Model#commitAddressBook()`, so the address book state will not be saved into the `addressBookStateList`.  
+<div markdown="span" class="alert alert-info">:information_source: **Note:** If a command fails its execution, it will not call `Model#commitAddressBook()`, so the address book state will not be saved into the `addressBookStateList`.
 
-</div>  
+</div>
 
 Step 4. The user now decides that adding the person was a mistake, and decides to undo that action by executing the `undo` command. The `undo` command will call `Model#undoAddressBook()`, which will shift the `currentStatePointer` once to the left, pointing it to the previous address book state, and restores the address book to that state.
 
 ![UndoRedoState3](images/UndoRedoState3.png)
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If the `currentStatePointer` is at index 0, pointing to the initial AddressBook state, then there are no previous AddressBook states to restore. The `undo` command uses `Model#canUndoAddressBook()` to check if this is the case. If so, it will return an error to the user rather  
-than attempting to perform the undo.  
+<div markdown="span" class="alert alert-info">:information_source: **Note:** If the `currentStatePointer` is at index 0, pointing to the initial AddressBook state, then there are no previous AddressBook states to restore. The `undo` command uses `Model#canUndoAddressBook()` to check if this is the case. If so, it will return an error to the user rather
+than attempting to perform the undo.
 
-</div>  
+</div>
 
 The following sequence diagram shows how the undo operation works:
 
 ![UndoSequenceDiagram](images/UndoSequenceDiagram.png)
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `UndoCommand` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline reaches the end of diagram.  
+<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `UndoCommand` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline reaches the end of diagram.
 
-</div>  
+</div>
 
-The `redo` command does the opposite—it calls `Model#redoAddressBook()`, which shifts the `currentStatePointer` once to the right, pointing to the previously undone state, and restores the address book to that state.
+The `redo` command does the opposite — it calls `Model#redoAddressBook()`, which shifts the `currentStatePointer` once to the right, pointing to the previously undone state, and restores the address book to that state.
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If the `currentStatePointer` is at index `addressBookStateList.size() - 1`, pointing to the latest address book state, then there are no undone AddressBook states to restore. The `redo` command uses `Model#canRedoAddressBook()` to check if this is the case. If so, it will return an error to the user rather than attempting to perform the redo.  
+<div markdown="span" class="alert alert-info">:information_source: **Note:** If the `currentStatePointer` is at index `addressBookStateList.size() - 1`, pointing to the latest address book state, then there are no undone AddressBook states to restore. The `redo` command uses `Model#canRedoAddressBook()` to check if this is the case. If so, it will return an error to the user rather than attempting to perform the redo.
 
-</div>  
+</div>
 
 Step 5. The user then decides to execute the command `list`. Commands that do not modify the address book, such as `list`, will usually not call `Model#commitAddressBook()`, `Model#undoAddressBook()` or `Model#redoAddressBook()`. Thus, the `addressBookStateList` remains unchanged.
 
@@ -218,7 +239,7 @@ Step 6. The user executes `clear`, which calls `Model#commitAddressBook()`. Sinc
 
 The following activity diagram summarizes what happens when a user executes a new command:
 
-<img src="images/CommitActivityDiagram.png" width="250" />  
+<img src="images/CommitActivityDiagram.png" width="250" />
 
 #### Design considerations:
 
@@ -228,12 +249,29 @@ The following activity diagram summarizes what happens when a user executes a ne
     * Pros: Easy to implement.
     * Cons: May have performance issues in terms of memory usage.
 
-* **Alternative 2:** Individual command knows how to undo/redo by  
+* **Alternative 2:** Individual command knows how to undo/redo by
   itself.
     * Pros: Will use less memory (e.g. for `delete`, just save the person being deleted).
     * Cons: We must ensure that the implementation of each individual command are correct.
 
 _{more aspects and alternatives to be added}_
+
+### Viewing a client's full profile
+
+As we add more attributes and interactions with clients, we will need a better way to view all of the information associated with a client. Therefore instead of displaying all information in a `PersonCard` within the list of clients, we will need a new component to display the client profile in a better way.
+
+The new `ClientProfilePanel` UI component is the replacement for displaying client profiles. Beside the require and optional fields, the user can also see all of their past interactions with the client.
+
+The client profile to display is tracked using a `SimpleObjectProperty` inside a `Model`. Since a `SimpleObjectProperty` is an `ObservableValue`, we can add listeners to its change event and update our UI whenever the currently selected profile changes.
+
+We currently support 2 ways of viewing a client's profile:
+
+1. By clicking on a client's card from the client list
+2. By using the `view` command
+
+Both methods will update the currently selected client, which will then trigger a listener to update the UI to show the profile panel.
+
+To exit out of the profile view, the user can enter the `list` command, which will hide the profile panel and restore the client list to occupy the full window width.
 
 ### \[Proposed\] Data archiving
 
@@ -256,8 +294,7 @@ Step 3. The user executes `reminder` that displays the same separate window that
 
 **Aspect: How Reminders executes:**
 
-  
---------------------------------------------------------------------------------------------------------------------  
+--------------------------------------------------------------------------------------------------------------------
 
 ## **Documentation, logging, testing, configuration, dev-ops**
 
@@ -267,7 +304,7 @@ Step 3. The user executes `reminder` that displays the same separate window that
 * [Configuration guide](Configuration.md)
 * [DevOps guide](DevOps.md)
 
---------------------------------------------------------------------------------------------------------------------  
+--------------------------------------------------------------------------------------------------------------------
 
 ## **Appendix: Requirements**
 
@@ -288,14 +325,14 @@ Step 3. The user executes `reminder` that displays the same separate window that
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
-| Priority | As a …​                                     | I want to …​                     | So that I can…​                                                        |  
-| -------- | ------------------------------------------ | ------------------------------ | ---------------------------------------------------------------------- |  
-| `* * *`  | user                                       | record my client’s contact information         | conveniently refer to it later                             |  
-| `* * *`  | user                                       | access the full details of a particular client's information comprehensively               | aid my future interaction with this client |  
-| `* * *`  | user                                       | client profiles                | remove entries that I no longer need                                   |  
-| `* *`    | user                                       | add notes of my meetings with my clients          | track details for future interaction with client |  
-| `* *`    | user                                       | log the outcomes of my client interactions (e.g., interested, not interested, follow-up required)   | track progress of client interactions                |  
-| `* *`      | user                                       | mark a client as a "hot lead," "warm lead," or "cold lead           | gauge the sales potential of the client                                                 |  
+| Priority | As a …​                                     | I want to …​                     | So that I can…​                                                        |
+| -------- | ------------------------------------------ | ------------------------------ | ---------------------------------------------------------------------- |
+| `* * *`  | user                                       | record my client’s contact information         | conveniently refer to it later                             |
+| `* * *`  | user                                       | access the full details of a particular client's information comprehensively               | aid my future interaction with this client |
+| `* * *`  | user                                       | client profiles                | remove entries that I no longer need                                   |
+| `* *`    | user                                       | add notes of my meetings with my clients          | track details for future interaction with client |
+| `* *`    | user                                       | log the outcomes of my client interactions (e.g., interested, not interested, follow-up required)   | track progress of client interactions                |
+| `* *`      | user                                       | mark a client as a "hot lead," "warm lead," or "cold lead           | gauge the sales potential of the client                                                 |
 
 *{More to be added}*
 
@@ -307,12 +344,12 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 
-1. User requests to list clients
-2. Connectify shows a list of clients
-3. User requests to delete a specific client in the list
-4. Connectify deletes the client
+1.  User requests to list clients
+2.  Connectify shows a list of clients
+3.  User requests to delete a specific client in the list
+4.  Connectify deletes the client
 
-   Use case ends.
+    Use case ends.
 
 **Extensions**
 
@@ -331,12 +368,12 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 
-1. User requests to list clients
-2. Connectify shows a list of clients
-3. User requests create a client interaction
-4. Connectify adds the interaction to the client profile
+1.  User requests to list clients
+2.  Connectify shows a list of clients
+3.  User requests create a client interaction
+4.  Connectify adds the interaction to the client profile
 
-   Use case ends.
+    Use case ends.
 
 **Extensions**
 
@@ -357,12 +394,12 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 
-1. User requests to list clients
-2. Connectify shows a list of clients
-3. User requests to mark a client as “Cold”, “Warm” or “Hot” Lead
-4. Connectify displays the updated client profile
+1.  User requests to list clients
+2.  Connectify shows a list of clients
+3.  User requests to mark a client as “Cold”, “Warm” or “Hot” Lead
+4.  Connectify displays the updated client profile
 
-   Use case ends.
+    Use case ends.
 
 **Extensions**
 
@@ -382,13 +419,13 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Non-Functional Requirements
 
-1. Should work on any _mainstream OS_ as long as it has Java `11` or above installed.
-2. Should be able to hold up to 1000 persons without a noticeable sluggishness in performance for typical usage.
-3. A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
-4. The system should work in both 32-bit and 64-bit environments.
-5. Response time for fetching a contact's details should not exceed 1.5 seconds.
-6. Search operations should return results within 2 seconds for queries against the full dataset.
-7. The system must be backward compatible with data generated from previous versions of the software.
+1.  Should work on any _mainstream OS_ as long as it has Java `11` or above installed.
+2.  Should be able to hold up to 1000 persons without a noticeable sluggishness in performance for typical usage.
+3.  A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
+4.  The system should work in both 32-bit and 64-bit environments.
+5.  Response time for fetching a contact's details should not exceed 1.5 seconds.
+6.  Search operations should return results within 2 seconds for queries against the full dataset.
+7.  The system must be backward compatible with data generated from previous versions of the software.
 
 ### Glossary
 
@@ -396,17 +433,17 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * **Hot/Warm/Cold Lead**: A hot lead is a potential client who is ready to buy. A warm lead is a potential client who is interested in buying. A cold lead is a potential client who is not ready to buy.
 
 *{More to be added}*
-  
---------------------------------------------------------------------------------------------------------------------  
+
+--------------------------------------------------------------------------------------------------------------------
 
 ## **Appendix: Instructions for manual testing**
 
 Given below are instructions to test the app manually.
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** These instructions only provide a starting point for testers to work on;  
-testers are expected to do more *exploratory* testing.  
+<div markdown="span" class="alert alert-info">:information_source: **Note:** These instructions only provide a starting point for testers to work on;
+testers are expected to do more *exploratory* testing.
 
-</div>  
+</div>
 
 ### Launch and shutdown
 
@@ -420,7 +457,7 @@ testers are expected to do more *exploratory* testing.
 
     1. Resize the window to an optimum size. Move the window to a different location. Close the window.
 
-    1. Re-launch the app by double-clicking the jar file.<br>  
+    1. Re-launch the app by double-clicking the jar file.<br>
        Expected: The most recent window size and location is retained.
 
 1. _{ more test cases …​ }_
@@ -431,13 +468,13 @@ testers are expected to do more *exploratory* testing.
 
     1. Prerequisites: List all persons using the `list` command. Multiple persons in the list.
 
-    1. Test case: `delete 1`<br>  
+    1. Test case: `delete 1`<br>
        Expected: First contact is deleted from the list. Details of the deleted contact shown in the status message. Timestamp in the status bar is updated.
 
-    1. Test case: `delete 0`<br>  
+    1. Test case: `delete 0`<br>
        Expected: No person is deleted. Error details shown in the status message. Status bar remains the same.
 
-    1. Other incorrect delete commands to try: `delete`, `delete x`, `...` (where x is larger than the list size)<br>  
+    1. Other incorrect delete commands to try: `delete`, `delete x`, `...` (where x is larger than the list size)<br>
        Expected: Similar to previous.
 
 1. _{ more test cases …​ }_
