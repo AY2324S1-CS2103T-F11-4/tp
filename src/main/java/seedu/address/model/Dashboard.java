@@ -4,13 +4,15 @@ import static java.util.Objects.requireNonNull;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.TreeSet;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.WeakListChangeListener;
 import javafx.util.Pair;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.interaction.Interaction;
@@ -21,7 +23,8 @@ import seedu.address.model.reminder.Reminder;
  */
 public class Dashboard {
     private final Model model;
-
+    private final ObservableList<Pair<LocalDate, ObservableList<Reminder>>> dateReminders =
+            FXCollections.observableArrayList();
     private boolean isDashboardDirty = true;
     private boolean isDashboardOpen = false;
 
@@ -40,9 +43,6 @@ public class Dashboard {
     private int totalHotLeads;
     private int totalWarmLeads;
     private int totalColdLeads;
-
-    private ObservableList<Reminder> reminderList;
-    private HashMap<LocalDate, ArrayList<Reminder>> dateToReminderMap = new HashMap<>();
 
     /**
      * Constructs a {@code Dashboard} with the given {@code Model}.
@@ -156,28 +156,28 @@ public class Dashboard {
         return totalClosedClients;
     }
 
-    public ObservableList<Reminder> getReminderList() {
-        updateDashboardIfDirty();
-        return reminderList;
-    }
-
-    private ObservableList<Reminder> getDateSpecificReminder(LocalDate date) {
-        updateDashboardIfDirty();
-        ObservableList<Reminder> reminderList = FXCollections.observableArrayList();
-        ArrayList<Reminder> retrievedReminders = dateToReminderMap.get(date);
-        if (retrievedReminders == null) {
-            return reminderList;
-        }
-        reminderList.addAll(retrievedReminders);
-        return reminderList;
-    }
-
     public ObservableList<Pair<LocalDate, ObservableList<Reminder>>> getDateReminders() {
         updateDashboardIfDirty();
-        ObservableList<LocalDate> sortedKeys = FXCollections.observableArrayList(
-                new TreeSet<>(dateToReminderMap.keySet()));
-        return sortedKeys.stream().map(date -> new Pair<>(date, getDateSpecificReminder(date)))
-                .collect(Collectors.toCollection(FXCollections::observableArrayList));
+
+        ObservableList<Reminder> reminderList = model.getFilteredReminderList();
+        updateDateReminders(reminderList);
+
+        reminderList.addListener(new WeakListChangeListener<>(c -> updateDateReminders(reminderList)));
+
+        return dateReminders;
+    }
+
+    private void updateDateReminders(ObservableList<Reminder> reminders) {
+        Map<LocalDate, List<Reminder>> remindersByDate = reminders.stream()
+                .collect(Collectors.groupingBy(Reminder::getFollowUpDate));
+
+        List<Pair<LocalDate, ObservableList<Reminder>>> dateRemindersList = new ArrayList<>();
+        for (Map.Entry<LocalDate, List<Reminder>> entry : remindersByDate.entrySet()) {
+            dateRemindersList.add(new Pair<>(entry.getKey(), FXCollections.observableArrayList(entry.getValue())));
+        }
+
+        dateRemindersList.sort(Comparator.comparing(Pair::getKey)); // sort by earliest date first
+        dateReminders.setAll(dateRemindersList);
     }
 
     /**
@@ -232,8 +232,6 @@ public class Dashboard {
 
         model.updateReminderList();
         model.updateFilteredReminderList(Reminder::isAfterNow);
-        reminderList = model.getFilteredReminderList();
-        updateDateToReminderMap();
 
         /*
          Set dashboard to be clean below. Not written yet as there is no overarching mechanism to integrate
@@ -245,8 +243,8 @@ public class Dashboard {
         ObservableList<Person> personList = model.getAddressBook().getPersonList();
 
         return personList.stream()
-                         .map(person -> person.getFilteredInteractions(i -> i.isOutcome(outcome)).size())
-                         .reduce(0, Integer::sum);
+                .map(person -> person.getFilteredInteractions(i -> i.isOutcome(outcome)).size())
+                .reduce(0, Integer::sum);
     }
 
     private int countPersonListInteraction() {
@@ -259,17 +257,6 @@ public class Dashboard {
         ObservableList<Person> personList = model.getAddressBook().getPersonList();
 
         return (int) personList.stream().filter(predicate).count();
-    }
-
-    private void updateDateToReminderMap() {
-        dateToReminderMap.clear();
-        this.reminderList.forEach(i -> addDateToReminderMap(i));
-    }
-
-    private void addDateToReminderMap(Reminder reminder) {
-        LocalDate reminderDate = reminder.getFollowUpDate();
-        dateToReminderMap.computeIfAbsent(reminderDate, k -> new ArrayList<>());
-        dateToReminderMap.get(reminderDate).add(reminder);
     }
 
     /**
